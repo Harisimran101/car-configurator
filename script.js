@@ -84,7 +84,7 @@ function updatematerials() {
 
 
 const dracoloader = new DRACOLoader();
-dracoloader.setDecoderPath( '/draco/' );
+dracoloader.setDecoderPath( 'draco/' );
 
 let body;
 let model;
