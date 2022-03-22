@@ -93,7 +93,7 @@ const gltfloader = new GLTFLoader()
 gltfloader.setDRACOLoader(dracoloader);
 
 gltfloader.load(
-  'car-file.gltf',
+  'car-1.glb',
   (gltf) => {
     model = gltf.scene;
     let ground = model.getObjectByName('Plane');
