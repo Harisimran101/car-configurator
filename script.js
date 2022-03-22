@@ -19,8 +19,8 @@ const size = {
 }
 
 //camera
-const camera = new THREE.PerspectiveCamera(65, size.with / size.height)
-camera.position.set(1.2, 1.8, 11)
+const camera = new THREE.PerspectiveCamera(50, size.with / size.height)
+camera.position.set(-9,5,-10)
 scene.add(camera)
 
 //canvas
@@ -35,7 +35,7 @@ const renderer = new THREE.WebGLRenderer({
 
 })
 renderer.setSize(size.with, size.height)
-renderer.setPixelRatio(window.devicePixelRatio * 2);
+renderer.setPixelRatio(window.devicePixelRatio);
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.85;
@@ -49,12 +49,18 @@ let groundshadow = textureloader.load('images/ground-shadow.png');
 
 
 const carmaterial = new THREE.MeshPhysicalMaterial({
-  color: 'red',
+  color: 'black',
   metalness: 0.5,
   roughness: 0.2,
   clearcoat: 1.4,
   specular: 1.4,
 })
+
+// Light 
+
+const directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
+scene.add( directionalLight );
+directionalLight.position.set(-3,4,2)
 
 //hdr texture
 
@@ -62,7 +68,7 @@ let envtexture;
 
 const rgb = new RGBELoader()
 rgb.load(
-  'environment3.hdr',
+  'Environment/environment.hdr',
   (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping,
       scene.background = texture;
@@ -76,7 +82,7 @@ function updatematerials() {
   scene.traverse((child) =>{
      if(child instanceof THREE.Mesh){
         child.material.envMap = envtexture;
-        child.material.envMapIntensity = 1.7;
+        child.material.envMapIntensity = 2;
 
      };
   })
@@ -125,7 +131,7 @@ gltfloader.load(
 const controls = new OrbitControls(camera, canvas)
 controls.maxPolarAngle = Math.PI / 2;
 controls.enableDamping = true
-
+controls.target.set(0,0,0);
 
 
 
