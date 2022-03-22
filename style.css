@@ -123,3 +123,9 @@ body{
     border: none;
     cursor: pointer;
 }
+
+@media (max-width: 500px) {
+    .right-sidebar {
+         display: none;
+    }
+}
