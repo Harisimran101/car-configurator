@@ -6,8 +6,71 @@ import { DRACOLoader } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lo
 import { RGBELoader } from 'https://cdn.skypack.dev/three@0.136/examples/jsm/loaders/RGBELoader.js';
 // import { PMREMGenerator } from 'https://cdn.skypack.dev/three@0.136/examples/src/extras/PMREMGenerator.js'
 
+// UI Login 
+
+// Model Section
+
+const modelitems = document.querySelectorAll('.models');
+
+for(let i = 0; i < modelitems.length; i++){
+
+    modelitems[i].addEventListener('click', () =>{
+      console.log(modelitems[i])
+       for(let i = 0; i < modelitems.length; i++){
+
+        modelitems[i].classList.remove('active-model');
+       }
+
+
+      modelitems[i].classList.add('active-model');
+
+    })
+     
+}
+
+
+// END
+
+const sections = [];
+const modelsection = document.querySelector('.model-tab-container');
+const colorsection = document.querySelector('.color-tab-container');
+
+sections.push(modelsection);
+sections.push(colorsection);
+
+for(let i = 0; i < sections.length; i++){
+   sections[i].style.display = 'none';
+}
+
+
+const sectionbtns = document.querySelectorAll('.section-btn');
+console.log(sections)
+
+for(let i = 0; i < sectionbtns.length; i++){
+  sectionbtns[i].addEventListener('click', () =>{
+
+      for(let i = 0; i < sections.length; i++){
+        sections[i].classList.remove('section-active');
+        sectionbtns[i].classList.remove('active-btn');
+
+      }
+
+        sections[i].classList.add('section-active');
+        sectionbtns[i].classList.add('active-btn');
+
+  }) 
+
+}
+
+
 //scene
 function init(){
+
+  let model1,model2,model3;
+
+
+
+  
 
 const scene = new THREE.Scene()
 
@@ -45,8 +108,7 @@ renderer.toneMappingExposure = 0.85;
 
 
 const textureloader = new THREE.TextureLoader();
-let groundshadow = textureloader.load('images/ground-shadow.png');
-
+let groundshadow = textureloader.load('Environment/negy.jpg');
 
 const carmaterial = new THREE.MeshPhysicalMaterial({
   color: 'black',
@@ -56,9 +118,18 @@ const carmaterial = new THREE.MeshPhysicalMaterial({
   specular: 1.4,
 })
 
+const planegeometry = new THREE.BoxGeometry(60,90,0.05);
+const planematerial = new THREE.MeshStandardMaterial({
+     map: groundshadow,
+     roughness: 0.7
+})
+
+const plane = new THREE.Mesh(planegeometry,planematerial);
+scene.add(plane);
+plane.rotation.x = Math.PI / 2
 // Light 
 
-const directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
+const directionalLight = new THREE.DirectionalLight( 'white', 1 );
 scene.add( directionalLight );
 directionalLight.position.set(-3,4,2)
 
@@ -66,23 +137,24 @@ directionalLight.position.set(-3,4,2)
 
 let envtexture;
 
-const rgb = new RGBELoader()
-rgb.load(
-  'Environment/environment.hdr',
-  (texture) => {
-      texture.mapping = THREE.EquirectangularReflectionMapping,
-      scene.background = texture;
-      envtexture = texture;
-    
-     
-  }
-)
+const path = 'Environment/';
+				const format = '.jpg';
+				const urls = [
+					path + 'posx' + format, path + 'negx' + format,
+					path + 'posy' + format, path + 'negy' + format,
+					path + 'posz' + format, path + 'negz' + format
+				];
+
+				const refractionCube = new THREE.CubeTextureLoader().load( urls );
+				refractionCube.mapping = THREE.CubeRefractionMapping;
+
+scene.background = refractionCube;
 
 function updatematerials() {
   scene.traverse((child) =>{
-     if(child instanceof THREE.Mesh){
-        child.material.envMap = envtexture;
-        child.material.envMapIntensity = 2;
+     if(child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial){
+        child.material.envMap = refractionCube;
+        child.material.envMapIntensity = 3;
 
      };
   })
@@ -93,46 +165,138 @@ const dracoloader = new DRACOLoader();
 dracoloader.setDecoderPath( 'draco/' );
 
 let body;
-let model;
+let modeltoload = '1';
+
+const updatemodels = () =>{
+ 
+
+  for(let i = 0; i < modelitems.length; i++){
+     modelitems[i].addEventListener('click', () =>{
+      
+       
+
+     })
+
+  }
+} 
 
 const gltfloader = new GLTFLoader()
 gltfloader.setDRACOLoader(dracoloader);
 
-gltfloader.load(
-  'car-1.glb',
-  (gltf) => {
-    model = gltf.scene;
-    let ground = model.getObjectByName('Plane');
-    let carbody = model.getObjectByName('Car-body');
-    carbody.material = carmaterial;
+ switch(modeltoload){
+   case '1':
 
-    ground.material.map = groundshadow;
-    ground.scale.set(7.3,7.3,7.3);
-    model.scale.set(3, 3, 3);
-    scene.add(model);
-
-    model.traverse(function (child) {
+    gltfloader.load(
+      'car-1.glb',
+      (gltf) => {
+        model1 = gltf.scene;
+      
+        let carbody = model1.getObjectByName('Car-body');
+        carbody.material = carmaterial;
     
-      child.castShadow = true;
+       
+        model1.scale.set(4,4,4);
+        scene.add(model1);
 
-      if (child.material && child.material.name === 'carpaint') {
-        child.material = carmaterial
-      }
-    })
+        updatemodels();
+    
+        model1.traverse(function (child) {
+        
+          child.castShadow = true;
+    
+          if (child.material && child.material.name === 'carpaint') {
+            child.material = carmaterial
+          }
+    
+       
+        })
+    
+        updatematerials();
+      
+      })
 
-    updatematerials();
+      break;
 
-  
-  }
-)
+      case '2':
 
-//controls
+      
+         
+        gltfloader.load(
+          'car2.glb',
+          (gltf) => {
+            model1 = gltf.scene;
+          
+            let carbody = model1.getObjectByName('Car-body');
+            carbody.material = carmaterial;
+        
+           
+            model1.scale.set(4,4,4);
+            scene.add(model1);
+    
+            updatemodels();
+        
+            model1.traverse(function (child) {
+            
+              child.castShadow = true;
+        
+              if (child.material && child.material.name === 'carpaint') {
+                child.material = carmaterial
+              }
+        
+           
+            })
+        
+            updatematerials();
+          
+          })
+
+
+      break;
+
+      case '3':
+
+      
+         
+        gltfloader.load(
+          'car3.glb',
+          (gltf) => {
+            model1 = gltf.scene;
+          
+        
+           
+            model1.scale.set(4,4,4);
+            scene.add(model1);
+    
+            updatemodels();
+        
+            model1.traverse(function (child) {
+            
+              child.castShadow = true;
+        
+              if (child.material && child.material.name === 'carpaint') {
+                child.material = carmaterial
+              }
+        
+           
+            })
+        
+            updatematerials();
+          
+          })
+
+
+      break;
+    
+ }
+
+// Camera controls
 
 const controls = new OrbitControls(camera, canvas)
 controls.maxPolarAngle = Math.PI / 2;
 controls.enableDamping = true
+controls.enablePan = false;
 controls.target.set(0,0,0);
-
+controls.maxPolarAngle = Math.PI /2.2; 
 
 
 window.addEventListener('resize', onWindowResize, false)
